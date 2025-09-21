@@ -1,0 +1,74 @@
+# --------------------------------
+# Archivos y carpetas de compilación
+# --------------------------------
+bin/
+obj/
+[Bb]uild/
+[Bb]uildArtifacts/
+
+# --------------------------------
+# Visual Studio
+# --------------------------------
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# --------------------------------
+# Visual Studio Code
+# --------------------------------
+.vscode/
+
+# --------------------------------
+# Archivos de dependencias
+# --------------------------------
+packages/
+*.nupkg
+*.snupkg
+
+# Evitar restauración de paquetes locales
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+# --------------------------------
+# Archivos temporales y de sistema
+# --------------------------------
+*.log
+*.tlog
+*.tmp
+*.bak
+*.obj
+*.pdb
+*.cache
+*.dbmdl
+*.dbproj.schemaview
+*.jfm
+*.class
+
+# --------------------------------
+# Archivos de publicación
+# --------------------------------
+publish/
+out/
+*.Publish.xml
+*.pubxml
+*.publishproj
+
+# --------------------------------
+# Test y cobertura
+# --------------------------------
+TestResults/
+*.coverage
+*.coveragexml
+*.testsettings
+*.vsmdi
+*.trx
+
+# --------------------------------
+# Otros
+# --------------------------------
+_ReSharper*/
+*.DotSettings.user
+*.sln.iml
