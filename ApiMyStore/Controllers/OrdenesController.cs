@@ -92,20 +92,21 @@ namespace ApiMyStore.Controllers
             _db.CabeceraPedidos.Add(cabeceraPedido);
             await _db.SaveChangesAsync();
 
-            var items = new List<OrderItemDto>();
+            // recargar Items con el Product incluido
+            await _db.Entry(cabeceraPedido)
+                     .Collection(o => o.Items)
+                     .Query()
+                     .Include(i => i.Product)
+                     .LoadAsync();
 
-            foreach (var i in cabeceraPedido.Items)
+            // mapear a DTO usando i.Product ya cargado
+            var items = cabeceraPedido.Items.Select(i => new OrderItemDto
             {
-                var prod = await _db.Productos.FindAsync(i.ProductId);
-
-                items.Add(new OrderItemDto
-                {
-                    ProductId = i.ProductId,
-                    ProductName = prod?.Name ?? string.Empty,
-                    Quantity = i.Quantity,
-                    UnitPrice = i.UnitPrice
-                });
-            }
+                ProductId = i.ProductId,
+                ProductName = i.Product?.Name ?? string.Empty,
+                Quantity = i.Quantity,
+                UnitPrice = i.UnitPrice
+            }).ToList();
 
             var result = new OrderDto
             {
