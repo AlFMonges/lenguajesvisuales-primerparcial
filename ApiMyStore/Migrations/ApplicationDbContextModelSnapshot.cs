@@ -43,7 +43,7 @@ namespace ApiMyStore.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("CabeceraPedidos");
+                    b.ToTable("CabeceraPedidos", (string)null);
                 });
 
             modelBuilder.Entity("ApiMyStore.Models.Categoria", b =>
@@ -63,7 +63,7 @@ namespace ApiMyStore.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Categorias");
+                    b.ToTable("Categorias", (string)null);
                 });
 
             modelBuilder.Entity("ApiMyStore.Models.Pedido", b =>
@@ -92,7 +92,7 @@ namespace ApiMyStore.Migrations
 
                     b.HasIndex("ProductId");
 
-                    b.ToTable("Pedidos");
+                    b.ToTable("Pedidos", (string)null);
                 });
 
             modelBuilder.Entity("ApiMyStore.Models.Producto", b =>
@@ -123,7 +123,7 @@ namespace ApiMyStore.Migrations
 
                     b.HasIndex("CategoryId");
 
-                    b.ToTable("Productos");
+                    b.ToTable("Productos", (string)null);
                 });
 
             modelBuilder.Entity("ApiMyStore.Models.Usuario", b =>
@@ -154,7 +154,7 @@ namespace ApiMyStore.Migrations
                     b.HasIndex("Username")
                         .IsUnique();
 
-                    b.ToTable("Usuarios");
+                    b.ToTable("Usuarios", (string)null);
                 });
 
             modelBuilder.Entity("ApiMyStore.Models.CabeceraPedido", b =>
