@@ -19,14 +19,21 @@ namespace ApiMyStore.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> GetAll()
         {
-            return Ok(await _db.Categorias.ToListAsync());
+            var categorias = await _db.Categorias
+            .Include(c => c.Productos)
+            .ToListAsync();
+
+            return Ok(categorias);
         }
 
         [HttpGet("{id:int}")]
         [AllowAnonymous]
         public async Task<IActionResult> Get(int id)
         {
-            var cat = await _db.Categorias.FindAsync(id);
+            var cat = await _db.Categorias
+                .Include(c => c.Productos)
+                .FirstOrDefaultAsync(c => c.Id == id);
+
             if (cat == null) return NotFound();
             return Ok(cat);
         }

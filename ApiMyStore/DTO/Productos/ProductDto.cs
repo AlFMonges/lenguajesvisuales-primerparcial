@@ -1,4 +1,6 @@
-﻿namespace ApiMyStore.DTO.Productos
+﻿using ApiMyStore.DTO.Ordenes;
+
+namespace ApiMyStore.DTO.Productos
 {
     public class ProductDto
     {
