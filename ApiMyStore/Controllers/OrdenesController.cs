@@ -10,7 +10,6 @@ namespace ApiMyStore.Controllers
 {
     [ApiController]
     [Route("api/ordenes")]
-    [Authorize]
     public class OrdenesController : ControllerBase
     {
         private readonly ApplicationDbContext _db;
@@ -24,6 +23,7 @@ namespace ApiMyStore.Controllers
 
         // GET api/ordenes
         [HttpGet]
+        [Authorize]
         public async Task<IActionResult> GetAll()
         {
             var userId = _userService.GetUserId();
@@ -53,6 +53,7 @@ namespace ApiMyStore.Controllers
 
         // POST api/ordenes
         [HttpPost]
+        [Authorize]
         public async Task<IActionResult> Create([FromBody] CreateOrderDto dto)
         {
             var userId = _userService.GetUserId();
@@ -118,6 +119,91 @@ namespace ApiMyStore.Controllers
             };
 
             return Ok(result);
+        }
+
+        [HttpPut("{id}")]
+        [Authorize]
+        public async Task<IActionResult> Update(int id, [FromBody] CreateOrderDto dto)
+        {
+            var userId = _userService.GetUserId();
+
+            var orden = await _db.CabeceraPedidos
+                .Include(o => o.Items)
+                .FirstOrDefaultAsync(o => o.Id == id && o.UserId == userId);
+
+            if (orden == null)
+                return NotFound(new { message = "Orden no encontrada" });
+
+            if (dto.Items == null || !dto.Items.Any())
+                return BadRequest(new { message = "La orden debe contener al menos un producto." });
+
+            // restaurar stock previo
+            foreach (var item in orden.Items)
+            {
+                var producto = await _db.Productos.FindAsync(item.ProductId);
+                if (producto != null)
+                    producto.Stock += item.Quantity;
+            }
+
+            // limpiar ítems anteriores
+            _db.Pedidos.RemoveRange(orden.Items);
+            orden.Items.Clear();
+
+            // agregar los nuevos ítems
+            foreach (var item in dto.Items)
+            {
+                var producto = await _db.Productos.FindAsync(item.ProductId);
+                if (producto == null)
+                    return BadRequest(new { message = $"Producto {item.ProductId} no existe" });
+
+                if (producto.Stock < item.Quantity)
+                    return BadRequest(new { message = $"Stock insuficiente para {producto.Name}" });
+
+                producto.Stock -= item.Quantity;
+
+                orden.Items.Add(new Pedido
+                {
+                    ProductId = item.ProductId,
+                    Quantity = item.Quantity,
+                    UnitPrice = producto.Price
+                });
+            }
+
+            // recalcular total
+            orden.Total = orden.Items.Sum(i => i.Quantity * i.UnitPrice);
+            orden.Date = DateTime.UtcNow;
+
+            await _db.SaveChangesAsync();
+
+            return Ok(new { message = "Orden actualizada con éxito", orden.Id, orden.Total });
+        }
+
+        // DELETE api/ordenes/{id}
+        [HttpDelete("{id}")]
+        [Authorize]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var userId = _userService.GetUserId();
+
+            var orden = await _db.CabeceraPedidos
+                .Include(o => o.Items)
+                .FirstOrDefaultAsync(o => o.Id == id && o.UserId == userId);
+
+            if (orden == null)
+                return NotFound(new { message = "Orden no encontrada" });
+
+            // restaurar stock
+            foreach (var item in orden.Items)
+            {
+                var producto = await _db.Productos.FindAsync(item.ProductId);
+                if (producto != null)
+                    producto.Stock += item.Quantity;
+            }
+
+            _db.CabeceraPedidos.Remove(orden);
+            await _db.SaveChangesAsync();
+
+            return Ok(new { message = "Orden eliminada con éxito" });
         }
     }
 }

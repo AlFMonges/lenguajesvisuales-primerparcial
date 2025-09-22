@@ -18,10 +18,10 @@ namespace ApiMyStore.Services
 
             var claims = new[]
             {
-            new Claim(JwtRegisteredClaimNames.Sub, user.Username),
             new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
             new Claim("id", user.Id.ToString()),
-            new Claim(ClaimTypes.Role, user.Role ?? "User")
+            new Claim(ClaimTypes.Role, user.Role ?? "User"),
+            new Claim(JwtRegisteredClaimNames.Sub, user.Username),
         };
 
             var token = new JwtSecurityToken(

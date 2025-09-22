@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Http;
+using System.IdentityModel.Tokens.Jwt;
+
 
 namespace ApiMyStore.Services
 {
@@ -22,17 +24,31 @@ namespace ApiMyStore.Services
             if (user == null || !user.Identity!.IsAuthenticated)
                 throw new InvalidOperationException("Usuario no autenticado.");
 
-            // Buscar de forma robusta varias posibles claims que podrían contener el id
+            // DEBUG: Mostrar TODOS los claims
+            Console.WriteLine("=== TODOS LOS CLAIMS ===");
+            foreach (var claim in user.Claims)
+            {
+                Console.WriteLine($"Type: '{claim.Type}' | Value: '{claim.Value}'");
+            }
+            Console.WriteLine("========================");
+
+            // Buscar específicamente cada posible claim
+            var nameIdentifierClaim = user.FindFirst(ClaimTypes.NameIdentifier);
+            var idClaim = user.FindFirst("id");
+
+
+            // Usar la lógica original
             var idValue =
-                user.FindFirst(ClaimTypes.NameIdentifier)?.Value // estándar
-                ?? user.FindFirst("id")?.Value;               // tu implementación actual
-      //          ?? user.FindFirst(JwtRegisteredClaimNames.Sub)?.Value; // a veces se usa sub
+                user.FindFirst(ClaimTypes.NameIdentifier)?.Value
+                ?? user.FindFirst("id")?.Value;
+
+            Console.WriteLine($"ID Value seleccionado: '{idValue}'");
 
             if (string.IsNullOrEmpty(idValue))
                 throw new InvalidOperationException("Claim 'id' no encontrada en el token.");
 
             if (!int.TryParse(idValue, out var id))
-                throw new InvalidOperationException("Claim 'id' no tiene formato numérico.");
+                throw new InvalidOperationException($"Claim 'id' con valor '{idValue}' no tiene formato numérico.");
 
             return id;
         }
